@@ -1,0 +1,74 @@
+---
+- name: create default organization
+  tower_organization:
+    name: "{{ awx_organization_name }}"
+    state: present
+    tower_verify_ssl: false
+
+- name: Create a SCM credential from a private_key file
+  tower_credential:
+    name: "scm-{{ awx_scm_credential_username }}"
+    organization: "{{ awx_organization_name }}"
+    state: present
+    kind: scm
+    ssh_key_data: "{{ awx_scm_credential_private_key }}"
+    tower_verify_ssl: false
+  changed_when: false
+
+- name: create SCM project
+  tower_project:
+    name: "{{ awx_scm_project_name }}"
+    organization: "{{ awx_organization_name }}"
+    scm_type: git
+    scm_url: "{{ awx_scm_project_url }}"
+    scm_branch: "{{ awx_scm_project_branch }}"
+    scm_credential: "scm-{{ awx_scm_credential_username }}"
+    scm_update_on_launch: true
+    state: present
+    tower_verify_ssl: false
+
+- name: create default inventory
+  tower_inventory:
+    name: "{{ awx_organization_name }}-{{ awx_scm_project_name }}-inventory"
+    organization: "{{ awx_organization_name }}"
+    state: present
+    tower_verify_ssl: false
+
+- name: Add tower inventory source path
+  tower_inventory_source:
+    name: "{{ awx_scm_project_inventory_path }}"
+    inventory: "{{ awx_organization_name }}-{{ awx_scm_project_name }}-inventory"
+    source: scm
+    source_path: "{{ awx_scm_project_inventory_path }}"
+    source_project: "{{ awx_scm_project_name }}"
+    overwrite: true
+    overwrite_vars: true
+    update_on_project_update: true
+    state: present
+    tower_verify_ssl: false
+
+- name: copy vmware inventory script to local disk
+  copy:
+    src: vmware-inventory.py
+    dest: /etc/awx/vmware-inventory.py
+    mode: 0700
+
+- name: create vmware inventory script
+  command: "tower-cli inventory_script create \
+    --name='vmware-inventory.py' \
+    --script='@/etc/awx/vmware-inventory.py' \
+    --organization='{{ awx_organization_name }}'"
+  changed_when: false
+
+- name: Add vmware inventory source script
+  tower_inventory_source:
+    name: vmware-inventory.py
+    inventory: "{{ awx_organization_name }}-{{ awx_scm_project_name }}-inventory"
+    source: custom
+    source_script: vmware-inventory.py
+    source_vars: "{{ lookup('template', './vmware-inventory.yml.j2') }}"
+    overwrite: true
+    overwrite_vars: true
+    state: present
+    tower_verify_ssl: false
+  changed_when: false

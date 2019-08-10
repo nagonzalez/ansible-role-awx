@@ -1,0 +1,39 @@
+---
+- name: ensure ansible is installed
+  package:
+    name: ansible
+    state: present
+
+- name: clone awx install repo
+  git:
+    repo: "{{ awx_git_repo }}"
+    dest: "/opt/awx"
+    version: "{{ awx_git_version }}"
+
+- name: create directory to hold awx customizations
+  file:
+    path: /etc/awx
+    state: directory
+    mode: 0600
+
+- name: copy custom awx inventory file
+  template:
+    dest: "/etc/awx/inventory.ini"
+    src: "inventory.ini.j2"
+    mode: 0600
+
+- name: get awx pod info
+  k8s:
+    api_version: v1
+    kind: Pod
+    name: awx-0
+    namespace: "{{ awx_kubernetes_namespace }}"
+  ignore_errors: true
+  register: l_awx_pod
+
+- name: kick off installer
+  command: "ansible-playbook -i /etc/awx/inventory.ini install.yml"
+  args:
+    chdir: "/opt/awx/installer"
+  when:
+    - l_awx_pod.failed or (awx_git_version not in l_awx_pod|string)

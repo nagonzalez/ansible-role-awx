@@ -1,0 +1,11 @@
+username: {{ awx_admin_user }}
+use_token: False
+verbose: False
+certificate:
+format: human
+color: True
+host: https://{{ awx_kubernetes_ingress_hostname }}
+description_on: False
+verify_ssl: False
+oauth_token:
+password: {{ awx_admin_password }}

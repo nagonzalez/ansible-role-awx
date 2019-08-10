@@ -1,0 +1,56 @@
+---
+- name: install pip
+  package:
+    name: python2-pip
+    state: present
+
+- name: install ansible-tower-cli
+  pip:
+    name: ansible-tower-cli
+    version: "{{ awx_tower_cli_version }}"
+
+- name: copy tower_cli.cfg
+  template:
+    dest: /root/.tower_cli.cfg
+    src: tower_cli.cfg.j2
+    mode: 0600
+
+- name: remove default template
+  tower_job_template:
+    name: Demo Job Template
+    project: Demo Project
+    playbook: ''
+    job_type: run
+    state: absent
+    tower_verify_ssl: false
+  ignore_errors: true
+
+- name: remove default inventory
+  tower_inventory:
+    name: Demo Inventory
+    organization: Default
+    state: absent
+    tower_verify_ssl: false
+  ignore_errors: true
+
+- name: remove default project
+  tower_project:
+    name: Demo Project
+    organization: Default
+    state: absent
+    tower_verify_ssl: false
+
+- name: remove default credential
+  tower_credential:
+    name: Demo Credential
+    organization: Default
+    kind: ssh
+    state: absent
+    tower_verify_ssl: false
+  ignore_errors: true
+
+- name: remove default organization
+  tower_organization:
+    name: Default
+    state: absent
+    tower_verify_ssl: false

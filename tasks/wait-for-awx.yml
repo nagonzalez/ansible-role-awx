@@ -1,0 +1,19 @@
+---
+- name: get awx-web-svc info
+  k8s:
+    api_version: v1
+    kind: Service
+    name: awx-web-svc
+    namespace: "{{ awx_kubernetes_namespace }}"
+  register: l_awx_service
+
+- name: Set the awx host and port
+  set_fact:
+    l_awx_host: "{{ l_awx_service.result.spec.clusterIP }}"
+    l_awx_port: "{{ l_awx_service.result.spec.ports[0].port }}"
+
+- name: Wait for awx-web-svc to become responsive.
+  wait_for:
+    host: "{{ l_awx_host }}"
+    port: "{{ l_awx_port }}"
+    state: started

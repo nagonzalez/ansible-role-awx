@@ -1,0 +1,7 @@
+---
+- include: wait-for-awx.yml
+
+- name: patch awx ingress
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'ingress.yml.j2') }}"

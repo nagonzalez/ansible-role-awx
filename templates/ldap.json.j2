@@ -1,0 +1,32 @@
+{
+    "AUTH_LDAP_SERVER_URI": "{{ ldap_server_url }}",
+    "AUTH_LDAP_BIND_DN": "{{ ldap_bind_dn }}",
+    "AUTH_LDAP_BIND_PASSWORD": "{{ ldap_bind_password }}",
+    "AUTH_LDAP_USER_SEARCH": [
+        "{{ ldap_user_search }}",
+        "SCOPE_SUBTREE",
+        "(sAMAccountName=%(user)s)"
+    ],
+    "AUTH_LDAP_USER_ATTR_MAP": {
+        "first_name": "{{ ldap_user_first_name }}",
+        "last_name": "{{ ldap_user_last_name }}",
+        "email": "{{ ldap_user_email }}"
+    },
+    "AUTH_LDAP_GROUP_TYPE": "{{ ldap_group_type }}",
+    "AUTH_LDAP_GROUP_SEARCH": [
+        "{{ ldap_group_search }}",
+        "SCOPE_SUBTREE",
+        "(objectClass=group)"
+    ],
+    "AUTH_LDAP_REQUIRE_GROUP": "{{ ldap_require_group }}",
+    "AUTH_LDAP_USER_FLAGS_BY_GROUP" : {
+        "is_superuser": "{{ ldap_superuser }}"
+    },
+    "AUTH_LDAP_ORGANIZATION_MAP": {
+        "{{ awx_organization_name }}": {
+            "admins": [
+                "{{ ldap_organization_admins }}"
+            ]
+        }
+    }
+}

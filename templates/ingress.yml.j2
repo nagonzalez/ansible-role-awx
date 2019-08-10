@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations: {{ awx_kubernetes_ingress_annotations | to_json }}
+  name: awx-web-svc
+  namespace: {{ awx_kubernetes_namespace }}
+spec:
+  rules:
+  - host: {{ awx_kubernetes_ingress_hostname }}
+    http:
+      paths:
+      - backend:
+          serviceName: awx-web-svc
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - {{ awx_kubernetes_ingress_hostname }}
+    secretName: {{ awx_kubernetes_ingress_tls_secret_name }}

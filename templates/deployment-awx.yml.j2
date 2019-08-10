@@ -1,0 +1,24 @@
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: awx
+  namespace: {{ awx_kubernetes_namespace }}
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    spec:
+      containers:
+      - name: awx-web
+        env:
+        - name: LDAPTLS_REQCERT
+          value: "never"
+      - name: awx-rabbit
+        env:
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: RABBITMQ_NODENAME
+          value: rabbit@$(MY_POD_IP)

@@ -1,0 +1,10 @@
+---
+- include: install.yml
+
+- include: ingress.yml
+
+- include: cleanup.yml
+
+- include: config.yml
+
+- include: ldaps.yml
